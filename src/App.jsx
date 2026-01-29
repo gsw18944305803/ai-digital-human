@@ -3,12 +3,16 @@ import { HashRouter, Routes, Route } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Home from './pages/Home';
 import BlankPage from './pages/BlankPage';
+import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
+import AICompanion from './components/AICompanion';
+import ComputeBalance from './components/ComputeBalance';
 
 function Layout() {
   const [theme, setTheme] = useState(() => {
-    if (typeof window === 'undefined') return 'light';
+    if (typeof window === 'undefined') return 'dark';
     const saved = window.localStorage.getItem('theme');
-    return saved === 'light' || saved === 'dark' ? saved : 'light';
+    return saved === 'light' || saved === 'dark' ? saved : 'dark';
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
@@ -27,8 +31,9 @@ function Layout() {
     <div className={`min-h-screen font-sans selection:bg-blue-500/30 flex ${theme === 'dark' ? 'bg-ai-dark text-white' : 'bg-white text-gray-900'}`}>
       <Sidebar />
       <div className="flex-1 flex flex-col h-screen overflow-y-auto">
-        <div className="fixed top-4 right-4 z-50">
-          <button 
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-3">
+          <ComputeBalance />
+          <button
             className={`backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 text-sm transition-all ${
               theme === 'dark'
                 ? 'bg-ai-card/80 border border-white/10 text-gray-100 hover:border-blue-500/70 hover:text-white'
@@ -41,7 +46,7 @@ function Layout() {
               {theme === 'dark' ? '深色' : '浅色'}
             </span>
           </button>
-          
+
           {isDropdownOpen && (
             <div
               className={`absolute right-0 mt-2 w-32 rounded-xl py-2 shadow-lg animate-in fade-in slide-in-from-top-2 ${
@@ -77,6 +82,8 @@ function Layout() {
           <Home />
         </main>
       </div>
+      {/* AI伴随助手 - 固定在右下角 */}
+      <AICompanion />
     </div>
   );
 }
@@ -87,6 +94,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />} />
         <Route path="/backend" element={<BlankPage />} />
+        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/dashboard" element={<AdminDashboard />} />
       </Routes>
     </HashRouter>
   );

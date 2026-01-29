@@ -61,7 +61,7 @@ const ToolsGrid = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {tools.map((tool, index) => (
-            <div key={index} onClick={() => navigate(`/backend?title=${encodeURIComponent(tool.title)}`)} className="bg-ai-dark border border-white/5 rounded-2xl p-10 transition-all duration-200 group cursor-pointer hover:-translate-y-1 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/30">
+            <div key={index} id={tool.title === 'AI生图' ? 'ai-image-tool' : undefined} onClick={() => navigate(`/backend?title=${encodeURIComponent(tool.title)}`)} className="bg-ai-dark border border-white/5 rounded-2xl p-10 transition-all duration-200 group cursor-pointer hover:-translate-y-1 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/30">
               <div className={`mb-4 ${tool.color} bg-white/5 w-16 h-16 mb-6 rounded-xl flex items-center justify-center`}>
                 <tool.icon size={32} />
               </div>

@@ -34,38 +34,63 @@ body.theme-dark {
 }
 
 body.theme-light {
-  @apply bg-white text-gray-900;
+  @apply bg-slate-100 text-slate-900;
 }
 
 body.theme-light .bg-ai-dark {
-  @apply bg-white;
-}
-
-body.theme-light .bg-ai-card {
   @apply bg-slate-100;
 }
 
+body.theme-light .bg-ai-card {
+  @apply bg-white shadow-sm border border-slate-200;
+}
+
 body.theme-light .text-white {
-  @apply text-gray-900;
+  color: #0f172a; /* text-slate-900 */
 }
 
-
-body.theme-light .text-gray-100 {
-  @apply text-gray-900;
+/* 增强浅色模式下的对比度与层级感 */
+body.theme-light .border-white\/5 {
+  @apply border-slate-200;
 }
 
-body.theme-light .text-gray-200 {
-  @apply text-gray-900;
+body.theme-light .bg-white\/5 {
+  @apply bg-slate-200/50;
 }
 
-body.theme-light .text-gray-300 {
-  @apply text-gray-800;
+body.theme-light .hover\:bg-white\/10:hover {
+  @apply hover:bg-slate-200;
 }
 
 body.theme-light .text-gray-400 {
-  @apply text-gray-700;
+  color: #475569; /* text-slate-600 */
 }
 
-body.theme-light .text-gray-500 {
-  @apply text-gray-700;
+/* 侧边栏样式覆盖 */
+body.theme-light .bg-black\/20 {
+  @apply bg-white border border-slate-200;
+}
+
+body.theme-light .border-white\/10 {
+  @apply border-slate-200;
+}
+
+body.theme-light .hover\:bg-white\/5:hover {
+  @apply hover:bg-slate-200;
+}
+
+/* 针对功能卡片的优化 */
+body.theme-light .group.cursor-pointer {
+  @apply bg-white shadow-sm border-slate-200 hover:shadow-md hover:border-blue-500 hover:bg-slate-50;
+}
+
+/* 输入框优化 */
+body.theme-light input, 
+body.theme-light textarea, 
+body.theme-light select {
+  @apply bg-white border-slate-300 text-slate-900;
+}
+
+body.theme-light ::placeholder {
+  color: #94a3b8; /* text-slate-400 */
 }

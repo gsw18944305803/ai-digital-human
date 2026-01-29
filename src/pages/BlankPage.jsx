@@ -1,24 +1,178 @@
 import FranchiseGenerator from '../components/FranchiseGenerator';
 import SoraVideoGenerator from '../components/SoraVideoGenerator';
-import React from 'react';
+import React, { useState } from 'react';
 import { ChevronLeft, Sparkles, Image as ImageIcon, Search, User, Sliders, Play, Film, Share2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import MultiPlatformVideoExtractor from '../components/MultiPlatformVideoExtractor';
 import MarketingGenerator from '../components/MarketingGenerator';
 import UniversalGenerator from '../components/UniversalGenerator';
+import AIChat from '../components/AIChat';
+import ImageProcessingModule from '../components/image-processing/ImageProcessingModule';
+import WritingGenerator from '../components/WritingGenerator';
+import PPTGenerator from '../components/PPTGenerator';
+import AcademicSearch from '../components/AcademicSearch';
+import CrawlerGenerator from '../components/CrawlerGenerator';
+import PaperGenerator from '../components/PaperGenerator';
+import CardGenerator from '../components/CardGenerator';
+import Model3DConverter from '../components/Model3DConverter';
+import VideoTranslator from '../components/VideoTranslator';
+import VoiceCloneGenerator from '../components/VoiceCloneGenerator';
+import CopywritingExtractor from '../components/CopywritingExtractor';
+import AudioVideoToArticle from '../components/AudioVideoToArticle';
+import AIExcelProcessor from '../components/AIExcelProcessor';
+import GlobalFreeAPIs from '../components/GlobalFreeAPIs';
+import TTSVoiceCloning from '../components/TTSVoiceCloning';
+import FetchViralVideos from '../components/FetchViralVideos';
+import RealTimeTrends from '../components/RealTimeTrends';
+import RemoteControlTools from '../components/RemoteControlTools';
+import AIShortDramaEditor from '../components/AIShortDramaEditor';
+import AIBatchVideoProduction from '../components/AIBatchVideoProduction';
 
 const BlankPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const title = searchParams.get('title') || '后端页面';
-  const isAIImage = title === 'AI生图' || title === '绘画机器人' || title === 'AI老照片修复' || title === 'AI电商场景图生成' || title === 'AI图片工具箱' || title === 'AI 图片翻译' || title === '证件照生成' || title === 'AI 头像制作' || title === 'AI照片说话' || title === 'AI 红包封面生成' || title === 'AI 换衣' || title === 'AI 矢量图生成' || title === '图片竞技场' || title === 'AI 3D 建模' || title === 'Lora风格创意站' || title === 'ComfyUI工具箱' || title === 'AI绘图提示词专...' || title === 'AI 图像创意站' || title === 'AI 人像创意站';
+  const isAIChat = title === 'AI 聊天';
+  
+  // 定义使用新 ImageProcessingModule 的功能
+  const imageProcessingTitles = [
+    '绘画机器人',
+    'AI老照片修复',
+    'AI电商场景图生成',
+    'AI图片工具箱',
+    'AI 图片翻译',
+    '证件照生成',
+    'AI 头像制作',
+    'AI照片说话', 'AI 红包封面生成', 'AI 换衣', 'AI 矢量图生成', '图片竞技场', 'AI绘图提示词专家', 'AI绘图提示词专...'
+  ];
+  const isImageProcessingFeature = imageProcessingTitles.includes(title);
+
+  // 写作类
+  const isWritingFeature = ['AI文案助手', 'AI电商文案助手', 'AI文档编辑器'].includes(title);
+  // PPT
+  const isPPTFeature = title === 'AI PPT制作';
+  // 学术
+  const isAcademicFeature = title === 'AI学术论文搜索';
+  // 论文写作
+  const isPaperFeature = title === 'AI论文写作';
+  // 卡片生成
+  const isCardFeature = title === 'AI 卡片生成';
+  // 3D建模
+  const is3DModelFeature = title === 'AI 3D 建模';
+  // 视频深度翻译
+  const isVideoTranslatorFeature = title === 'AI视频深度翻译';
+  // 爬虫
+  const isCrawlerFeature = title === '网页数据提取工具';
+  // 音色克隆
+  const isVoiceCloneFeature = title === 'AI语音生成器';
+
+  // 实用工具类
+  const isCopywritingExtractor = title === 'AI文案提取与分析';
+  const isAudioVideoToArticle = title === '音视频转文章';
+  const isAIExcelProcessor = title === 'AI自动化处理Excel';
+  const isGlobalFreeAPIs = title === '免费API汇总';
+  const isTTSVoiceCloning = title === 'TTS声音克隆';
+  const isFetchViralVideos = title === '抓取爆款视频';
+  const isRealTimeTrends = title === '热点实时聚合';
+  const isRemoteControlTools = title === '远程控制工具';
+  const isAIShortDramaEditor = title === 'AI短剧零剪辑';
+  const isAIBatchVideoProduction = title === '批量视频制作';
+
+  // 排除掉已由 ImageProcessingModule 处理的功能
+  const isAIImage = (title === 'AI生图' || title === 'Lora风格创意站' || title === 'ComfyUI工具箱' || title === 'AI 图像创意站' || title === 'AI 人像创意站') && !isImageProcessingFeature;
+  
   const isVideoPipeline = title === '一站式视频创作流水线';
   const isSoraVideo = title === 'Sora2 视频生成';
   const isMultiPlatform = title === '多平台视频数据一键提取';
   const isMarketing = title === '宣传海报、视频制作';
   const isFranchise = title === '招商加盟';
-  const isUniversal = title === 'AI翻译大师' || title === 'AI提示词专家' || title === 'AI搜索大师3.0' || title === '网页数据提取工具' || title === 'AI提示词专家2.0' || title === 'AI事实求证' || title === 'AI 卡片生成' || title === 'AI 模型判官' || title === '模型竞技场' || title === 'AI文案助手' || title === 'AI电商文案助手' || title === 'AI文档编辑器' || title === 'AI PPT制作' || title === 'AI 网页总结' || title === 'AI 画图版' || title === 'AI 财讯助手' || title === 'AI Excel' || title === 'AI 简历制作' || title === 'AI 小说写作' || title === 'AI网页生成器' || title === 'AI网页生成器2.0' || title === '代码竞技场' || title === '网页一键部署' || title === 'AI视频素材创意站' || title === 'AI视频生成器' || title === 'AI音视频总结' || title === 'AI视频实时翻译' || title === 'AI视频深度翻译' || title === '视频竞技场' || title === '数字人生生成' || title === 'AI学术论文搜索' || title === 'PDF全能工具箱' || title === 'AI专利搜索' || title === 'AI论文写作' || title === 'AI答题机' || title === 'AI语音生成器' || title === 'AI 音乐制作' || title === 'AI 播客制作' || title === 'AI 语音通话' || title === '语音竞技场';
+  const isUniversal = title === 'AI翻译大师' || title === 'AI提示词专家' || title === 'AI搜索大师3.0' || title === 'AI提示词专家2.0' || title === 'AI事实求证' || title === 'AI 模型判官' || title === '模型竞技场' || title === 'AI 网页总结' || title === 'AI 画图版' || title === 'AI 财讯助手' || title === 'AI Excel' || title === 'AI 简历制作' || title === 'AI 小说写作' || title === 'AI网页生成器' || title === 'AI网页生成器2.0' || title === '代码竞技场' || title === '网页一键部署' || title === 'AI视频素材创意站' || title === 'AI视频生成器' || title === 'AI音视频总结' || title === 'AI视频实时翻译' || title === '视频竞技场' || title === '数字人生生成' || title === 'PDF全能工具箱' || title === 'AI专利搜索' || title === 'AI答题机' || title === 'AI 音乐制作' || title === 'AI 播客制作' || title === 'AI 语音通话' || title === '语音竞技场';
+
+  const [imagePrompt, setImagePrompt] = useState('');
+  const [aspectRatio, setAspectRatio] = useState('1:1');
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState(null);
+  const [imageError, setImageError] = useState('');
+
+  const mapAspectRatioForApi = (ratio) => {
+    switch (ratio) {
+      case '1:1':
+      case '16:9':
+      case '9:16':
+      case '4:3':
+      case '3:4':
+      case '21:9':
+      case '9:21':
+        return ratio;
+      default:
+        return '1:1';
+    }
+  };
+
+const handleGenerateImage = async () => {
+    if (!isAIImage) return;
+    if (!imagePrompt.trim()) return;
+
+    // Hardcoded API Key as requested by user
+    const apiKey = 'sk-Rc1j1a6cfUeWlOZYHgXikivqfrUpOdUlGz2ziD772dXFEFZd';
+
+    setIsGeneratingImage(true);
+    setImageError('');
+    setGeneratedImageUrl(null);
+
+    const doubaoFeatures = [
+      'AI电商场景图生成',
+      'AI图片工具箱',
+      'AI 图片翻译',
+      '证件照生成',
+      'AI 头像制作',
+      'AI 换衣'
+    ];
+
+    const isDoubao = doubaoFeatures.includes(title);
+    const apiUrl = isDoubao 
+      ? 'https://api.302.ai/doubao/drawing/seededit' 
+      : 'https://api.302.ai/302/submit/luma-photon-flash';
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          prompt: imagePrompt.trim(),
+          aspect_ratio: mapAspectRatioForApi(aspectRatio),
+        }),
+      });
+
+      const data = await response.json().catch(() => null);
+
+      if (!response.ok) {
+        const messageFromApi =
+          data && data.error && (data.error.message_cn || data.error.message);
+        throw new Error(messageFromApi || '图片生成失败，请稍后重试');
+      }
+
+      const url =
+        data &&
+        Array.isArray(data.images) &&
+        data.images[0] &&
+        data.images[0].url;
+
+      if (!url) {
+        throw new Error('接口未返回图片地址，请稍后重试');
+      }
+
+      setGeneratedImageUrl(url);
+    } catch (error) {
+      setImageError(error.message || '图片生成失败，请稍后重试');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-ai-dark text-white flex flex-col">
@@ -33,7 +187,47 @@ const BlankPage = () => {
       </header>
 
       <main className="flex-1 p-6 overflow-y-auto">
-        {isAIImage ? (
+        {isImageProcessingFeature ? (
+          <ImageProcessingModule featureKey={title} />
+        ) : isWritingFeature ? (
+          <WritingGenerator featureKey={title} />
+        ) : isPPTFeature ? (
+          <PPTGenerator />
+        ) : isCrawlerFeature ? (
+          <CrawlerGenerator />
+        ) : isAcademicFeature ? (
+          <AcademicSearch />
+        ) : isPaperFeature ? (
+          <PaperGenerator />
+        ) : isCardFeature ? (
+          <CardGenerator />
+        ) : is3DModelFeature ? (
+          <Model3DConverter />
+        ) : isVideoTranslatorFeature ? (
+          <VideoTranslator />
+        ) : isVoiceCloneFeature ? (
+          <VoiceCloneGenerator />
+        ) : isCopywritingExtractor ? (
+          <CopywritingExtractor />
+        ) : isAudioVideoToArticle ? (
+          <AudioVideoToArticle />
+        ) : isAIExcelProcessor ? (
+          <AIExcelProcessor />
+        ) : isGlobalFreeAPIs ? (
+          <GlobalFreeAPIs />
+        ) : isTTSVoiceCloning ? (
+          <TTSVoiceCloning />
+        ) : isFetchViralVideos ? (
+          <FetchViralVideos />
+        ) : isRealTimeTrends ? (
+          <RealTimeTrends />
+        ) : isRemoteControlTools ? (
+          <RemoteControlTools />
+        ) : isAIShortDramaEditor ? (
+          <AIShortDramaEditor />
+        ) : isAIBatchVideoProduction ? (
+          <AIBatchVideoProduction />
+        ) : isAIImage ? (
           <div className="max-w-7xl mx-auto space-y-6">
             <div>
               <h2 className="text-2xl font-semibold mb-2">{title}</h2>
@@ -79,6 +273,8 @@ const BlankPage = () => {
                     <textarea
                       className="w-full bg-transparent outline-none text-sm text-gray-100 placeholder-gray-500 resize-none min-h-[80px]"
                       placeholder="例如：保持主体姿态不变，强化金属质感，并在背景加入霓虹色光效..."
+                      value={imagePrompt}
+                      onChange={(event) => setImagePrompt(event.target.value)}
                     />
                   </div>
                 </section>
@@ -94,10 +290,11 @@ const BlankPage = () => {
                         <button
                           key={ratio}
                           className={`h-16 rounded-xl border text-xs flex flex-col items-center justify-center gap-1 transition-all ${
-                            index === 0
+                            aspectRatio === ratio
                               ? 'border-indigo-500 bg-indigo-500/20 text-indigo-100 shadow-[0_0_0_1px_rgba(129,140,248,0.4)]'
                               : 'border-white/5 bg-ai-dark/60 text-gray-400 hover:border-indigo-400/70 hover:text-indigo-100'
                           }`}
+                          onClick={() => setAspectRatio(ratio)}
                         >
                           <span className="inline-flex items-center justify-center rounded-md bg-black/40 w-7 h-4">
                             {ratio === '1:1' ? '■' : '▭'}
@@ -142,12 +339,25 @@ const BlankPage = () => {
                     <div className="text-sm font-medium">生成预览</div>
                     <span className="text-xs text-gray-500">生成完成后将在此展示高清预览</span>
                   </div>
-                  <div className="flex-1 rounded-xl bg-ai-dark/60 border border-dashed border-white/10 flex flex-col items-center justify-center text-gray-500 text-sm">
-                    <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 text-gray-400">
-                      <ImageIcon size={24} />
-                    </div>
-                    <p>暂未生成图片</p>
+                  <div className="flex-1 rounded-xl bg-ai-dark/60 border border-dashed border-white/10 flex flex-col items-center justify-center text-gray-500 text-sm overflow-hidden">
+                    {generatedImageUrl ? (
+                      <img
+                        src={generatedImageUrl}
+                        alt="生成结果"
+                        className="max-h-full max-w-full object-contain rounded-lg"
+                      />
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3 text-gray-400">
+                          <ImageIcon size={24} />
+                        </div>
+                        <p>{isGeneratingImage ? '正在生成图片，请稍候...' : '暂未生成图片'}</p>
+                      </>
+                    )}
                   </div>
+                  {imageError && (
+                    <p className="mt-2 text-xs text-red-400 truncate">{imageError}</p>
+                  )}
                 </section>
 
                 <section className="bg-ai-card border border-white/5 rounded-2xl p-5 space-y-3">
@@ -165,8 +375,12 @@ const BlankPage = () => {
             </div>
 
             <div className="pt-2">
-              <button className="w-full h-12 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-medium text-white shadow-lg shadow-indigo-500/40 flex items-center justify-center gap-3 hover:from-indigo-400 hover:to-purple-400 transition-all">
-                <span>准备生成</span>
+              <button
+                className="w-full h-12 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-500 text-sm font-medium text-white shadow-lg shadow-indigo-500/40 flex items-center justify-center gap-3 hover:from-indigo-400 hover:to-purple-400 transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                onClick={handleGenerateImage}
+                disabled={isGeneratingImage || !imagePrompt.trim()}
+              >
+                <span>{isGeneratingImage ? '正在生成...' : '准备生成'}</span>
                 <span className="flex items-center gap-1 text-xs bg-black/20 px-2 py-1 rounded-full">
                   <span className="w-2 h-2 rounded-full bg-amber-400" />
                   <span>5 点数</span>
@@ -485,6 +699,8 @@ const BlankPage = () => {
           <MarketingGenerator />
         ) : isFranchise ? (
           <FranchiseGenerator />
+        ) : isAIChat ? (
+          <AIChat />
         ) : isUniversal ? (
           <UniversalGenerator title={title} />
         ) : (

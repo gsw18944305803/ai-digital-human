@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
-import { 
-  Wand2, 
-  Image as ImageIcon, 
-  Video, 
-  Loader2, 
-  Sparkles, 
-  Check, 
-  RefreshCw, 
+import {
+  Image as ImageIcon,
+  Video,
+  Loader2,
+  Check,
+  RefreshCw,
   Download,
   ShoppingBag,
   Utensils,
@@ -14,61 +12,110 @@ import {
   Laptop,
   Home,
   GraduationCap,
-  Layers
+  Layers,
+  X
 } from 'lucide-react';
+import { useSystemConfig } from '../hooks/useSystemConfig';
+import PromptOptimizer from './PromptOptimizer';
 
 const MarketingGenerator = () => {
+  const config = useSystemConfig();
   const [prompt, setPrompt] = useState('');
   const [industry, setIndustry] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState(''); // New state for tracking active button
   const [outputType, setOutputType] = useState('poster'); // 'poster' | 'video'
-  const [isOptimizing, setIsOptimizing] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [result, setResult] = useState(null);
-  const [showOptimizationResult, setShowOptimizationResult] = useState(false);
-  const [optimizedPrompt, setOptimizedPrompt] = useState('');
+  const [previewUrl, setPreviewUrl] = useState(null);
 
   const industries = [
     { id: 'food', name: '餐饮美食', icon: Utensils },
     { id: 'fashion', name: '服装时尚', icon: Shirt },
     { id: 'tech', name: '数码科技', icon: Laptop },
-    { id: 'beauty', name: '美妆护肤', icon: Sparkles },
+    { id: 'beauty', name: '美妆护肤', icon: Check },
     { id: 'realestate', name: '房产家居', icon: Home },
     { id: 'education', name: '教育培训', icon: GraduationCap },
     { id: 'other', name: '其他行业', icon: Layers },
   ];
 
-  const handleOptimize = () => {
-    if (!prompt) return;
-    setIsOptimizing(true);
-    // Simulate API call
-    setTimeout(() => {
-      const prefix = outputType === 'poster' ? '高清海报，商业摄影，' : '电影级运镜，4k画质，';
-      setOptimizedPrompt(`${prefix}${industry ? industry + '行业，' : ''}${prompt}，极简主义构图，柔和光影，高级感配色，8k分辨率，细节丰富`);
-      setIsOptimizing(false);
-      setShowOptimizationResult(true);
-    }, 1500);
+  const downloadImage = async (url) => {
+    if (!url) return;
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = `marketing-asset-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Download failed:', err);
+      window.open(url, '_blank');
+    }
   };
 
-  const applyOptimized = () => {
-    setPrompt(optimizedPrompt);
-    setShowOptimizationResult(false);
-  };
-
-  const handleGenerate = () => {
+  const handleGenerate = async () => {
     if (!prompt) return;
     setIsGenerating(true);
     setResult(null);
     
-    // Simulate generation
-    setTimeout(() => {
-      setResult({
-        type: outputType,
-        url: outputType === 'poster' 
-          ? 'https://images.unsplash.com/photo-1555421689-d68471e189f2?auto=format&fit=crop&q=80&w=1000' 
-          : 'https://assets.mixkit.co/videos/preview/mixkit-coffee-beans-falling-slowly-4395-large.mp4' // Placeholder video
+    if (outputType === 'video') {
+      // Keep mock for video as requested API is for images
+      setTimeout(() => {
+        setResult({
+          type: 'video',
+          url: 'https://assets.mixkit.co/videos/preview/mixkit-coffee-beans-falling-slowly-4395-large.mp4'
+        });
+        setIsGenerating(false);
+      }, 3000);
+      return;
+    }
+
+    try {
+      // 302.ai OpenAI Compatible Image Generation (DALL-E 3)
+      const fullPrompt = `${industry ? industry + '行业，' : ''}${prompt}`;
+      
+      const apiKey = config.models.image?.apiKey || config.models.chat?.apiKey || 'sk-Rc1j1a6cfUeWlOZYHgXikivqfrUpOdUlGz2ziD772dXFEFZd';
+      const apiUrl = config.models.image?.apiUrl || 'https://api.302.ai/v1/images/generations';
+      const modelName = config.models.image?.modelName || 'dall-e-3';
+
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: modelName,
+          prompt: fullPrompt,
+          n: 1,
+          size: "1024x1024"
+        })
       });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error?.message || data.message || '生成失败');
+      }
+
+      if (data.data && data.data.length > 0) {
+        setResult({
+          type: 'poster',
+          url: data.data[0].url
+        });
+      } else {
+        throw new Error('未获取到图片数据');
+      }
+    } catch (error) {
+      console.error('Generation error:', error);
+      alert(`生成失败: ${error.message}`);
+    } finally {
       setIsGenerating(false);
-    }, 3000);
+    }
   };
 
   return (
@@ -157,9 +204,16 @@ const MarketingGenerator = () => {
               {industries.map((ind) => (
                 <button
                   key={ind.id}
-                  onClick={() => setIndustry(ind.name)}
+                  onClick={() => {
+                    setSelectedCategory(ind.id);
+                    if (ind.id === 'other') {
+                      setIndustry(''); // Clear for manual input
+                    } else {
+                      setIndustry(ind.name);
+                    }
+                  }}
                   className={`px-3 py-3 rounded-xl border text-sm flex flex-col items-center justify-center gap-2 transition-all ${
-                    industry === ind.name
+                    selectedCategory === ind.id
                       ? 'bg-white/10 border-white/30 text-white'
                       : 'bg-ai-card border-white/5 text-gray-400 hover:bg-white/5 hover:text-gray-200'
                   }`}
@@ -169,9 +223,10 @@ const MarketingGenerator = () => {
                 </button>
               ))}
             </div>
-            {industry === '其他行业' && (
+            {selectedCategory === 'other' && (
                <input 
                  type="text"
+                 value={industry}
                  placeholder="请输入您的具体行业..."
                  className="w-full mt-2 px-4 py-3 bg-ai-card border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:border-orange-500/50 transition-all"
                  onChange={(e) => setIndustry(e.target.value)}
@@ -186,20 +241,15 @@ const MarketingGenerator = () => {
                   <span className="w-6 h-6 rounded-full bg-white/5 flex items-center justify-center text-xs text-gray-400">3</span>
                   创意描述
                 </div>
-                <button
-                  onClick={handleOptimize}
-                  disabled={!prompt || isOptimizing}
-                  className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-500/20 to-blue-500/20 border border-purple-500/30 text-purple-300 hover:border-purple-500/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isOptimizing ? (
-                    <Loader2 size={12} className="animate-spin" />
-                  ) : (
-                    <Wand2 size={12} />
-                  )}
-                  智能优化提示词
-                </button>
+                <PromptOptimizer
+                  value={prompt}
+                  onOptimized={setPrompt}
+                  featureKey="AI电商场景图生成"
+                  featureContext={`当前使用AI电商场景图生成功能，${outputType === 'poster' ? '海报' : '视频'}模式，${industry ? `行业：${industry}` : ''}。优化时使描述更加详细、具体，添加场景、风格、光影、构图等商业摄影要素。`}
+                  buttonClassName="text-xs px-2 py-1"
+                />
              </div>
-             
+
              <div className="relative group">
                <textarea
                  value={prompt}
@@ -207,39 +257,6 @@ const MarketingGenerator = () => {
                  placeholder="描述您想要生成的画面内容，例如：一款高端香水的商业摄影，柔和的晨光，玫瑰花瓣点缀..."
                  className="w-full h-32 bg-ai-card border border-white/10 rounded-2xl p-4 text-gray-200 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500/50 transition-all resize-none"
                />
-               
-               {/* Optimization Result Modal/Popover */}
-               {showOptimizationResult && (
-                 <div className="absolute top-full left-0 right-0 mt-2 z-10 animate-fade-in-up">
-                   <div className="bg-gray-900 border border-white/10 rounded-xl shadow-2xl p-4">
-                     <div className="flex items-center justify-between mb-2">
-                       <span className="text-xs font-medium text-purple-400 flex items-center gap-1">
-                         <Sparkles size={12} /> AI 优化结果
-                       </span>
-                       <button onClick={() => setShowOptimizationResult(false)} className="text-gray-500 hover:text-white text-xs">
-                         关闭
-                       </button>
-                     </div>
-                     <p className="text-sm text-gray-300 mb-3 bg-white/5 p-3 rounded-lg border border-white/5">
-                       {optimizedPrompt}
-                     </p>
-                     <div className="flex gap-2 justify-end">
-                       <button 
-                         onClick={() => setShowOptimizationResult(false)}
-                         className="px-3 py-1.5 rounded-lg text-xs text-gray-400 hover:bg-white/5"
-                       >
-                         使用原词
-                       </button>
-                       <button 
-                         onClick={applyOptimized}
-                         className="px-3 py-1.5 rounded-lg text-xs bg-purple-500 text-white hover:bg-purple-600"
-                       >
-                         使用优化后
-                       </button>
-                     </div>
-                   </div>
-                 </div>
-               )}
              </div>
           </section>
 
@@ -273,10 +290,18 @@ const MarketingGenerator = () => {
               <span className="text-sm font-medium text-gray-300">效果预览</span>
               {result && (
                 <div className="flex gap-2">
-                   <button className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="重新生成">
+                   <button 
+                     onClick={handleGenerate}
+                     className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" 
+                     title="重新生成"
+                   >
                      <RefreshCw size={14} />
                    </button>
-                   <button className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" title="下载">
+                   <button 
+                     onClick={() => downloadImage(result.url)}
+                     className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors" 
+                     title="下载"
+                   >
                      <Download size={14} />
                    </button>
                 </div>
@@ -301,7 +326,10 @@ const MarketingGenerator = () => {
                   
                   {/* Hover Actions */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                     <button className="px-6 py-2 rounded-full bg-white text-black font-medium text-sm hover:scale-105 transition-transform">
+                     <button 
+                       onClick={() => setPreviewUrl(result.url)}
+                       className="px-6 py-2 rounded-full bg-white text-black font-medium text-sm hover:scale-105 transition-transform"
+                     >
                         查看大图
                      </button>
                   </div>
@@ -332,6 +360,45 @@ const MarketingGenerator = () => {
           </div>
         </div>
       </div>
+
+      {/* Image Preview Modal */}
+      {previewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm animate-fade-in" onClick={() => setPreviewUrl(null)}>
+          <div className="relative max-w-7xl max-h-[90vh] p-4 flex flex-col items-center" onClick={e => e.stopPropagation()}>
+            <button 
+              onClick={() => setPreviewUrl(null)}
+              className="absolute top-4 right-4 md:-top-12 md:right-0 p-2 text-white/70 hover:text-white transition-colors bg-black/50 rounded-full md:bg-transparent"
+            >
+              <X size={24} />
+            </button>
+            
+            {outputType === 'poster' ? (
+              <img 
+                src={previewUrl} 
+                alt="Full Preview" 
+                className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl"
+              />
+            ) : (
+               <video 
+                 src={previewUrl} 
+                 controls 
+                 className="max-w-full max-h-[80vh] rounded-lg shadow-2xl"
+                 autoPlay
+               />
+            )}
+            
+            <div className="mt-6 flex gap-4">
+              <button 
+                onClick={() => downloadImage(previewUrl)}
+                className="px-8 py-3 bg-white text-black rounded-full font-medium shadow-lg hover:scale-105 transition-transform flex items-center gap-2"
+              >
+                <Download size={20} />
+                下载原图
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
